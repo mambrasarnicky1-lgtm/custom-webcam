@@ -7,6 +7,7 @@ import android.os.Bundle
 import android.util.Log
 import android.util.Size
 import android.widget.Button
+import android.widget.EditText
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import androidx.camera.core.CameraSelector
@@ -52,10 +53,14 @@ class MainActivity : AppCompatActivity() {
 
         setupButtons()
 
+        val sharedPrefs = getSharedPreferences("WebcamPrefs", MODE_PRIVATE)
+        val savedIp = sharedPrefs.getString("pc_ip", "127.0.0.1") ?: "127.0.0.1"
+        findViewById<EditText>(R.id.editIpAddress).setText(savedIp)
+
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED) {
             ActivityCompat.requestPermissions(this, arrayOf(Manifest.permission.CAMERA), 100)
         } else {
-            connectSocket()
+            connectSocket(savedIp)
         }
     }
 
@@ -92,31 +97,46 @@ class MainActivity : AppCompatActivity() {
             }
             startCamera() // Restart kamera dengan resolusi baru
         }
+
+        val btnConnect = findViewById<Button>(R.id.btnConnect)
+        val editIpAddress = findViewById<EditText>(R.id.editIpAddress)
+        btnConnect.setOnClickListener {
+            val ip = editIpAddress.text.toString().trim()
+            if (ip.isNotEmpty()) {
+                getSharedPreferences("WebcamPrefs", MODE_PRIVATE).edit().putString("pc_ip", ip).apply()
+                connectSocket(ip)
+            }
+        }
     }
 
     override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<out String>, grantResults: IntArray) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults)
         if (requestCode == 100 && grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-            connectSocket()
+            val editIp = findViewById<EditText>(R.id.editIpAddress)
+            connectSocket(editIp.text.toString())
         }
     }
 
-    private fun connectSocket() {
+    private fun connectSocket(ip: String) {
         val statusText = findViewById<TextView>(R.id.statusText)
+        statusText.text = "Konek ke $ip..."
         
         scope.launch {
             try {
-                socket = Socket("127.0.0.1", 5000)
+                isConnected = false
+                socket?.close()
+                
+                socket = Socket(ip, 5000)
                 outputStream = socket?.getOutputStream()
                 isConnected = true
                 
                 withContext(Dispatchers.Main) {
-                    statusText.text = "[LIVE] Memancarkan Video"
+                    statusText.text = "[LIVE] Terhubung ke $ip"
                     startCamera()
                 }
             } catch (e: Exception) {
                 withContext(Dispatchers.Main) {
-                    statusText.text = "[Offline] Gagal konek ke PC"
+                    statusText.text = "[Offline] Gagal hubung ke $ip"
                     // Walaupun offline, kita tetap bisa preview kamera lokal
                     startCamera()
                 }

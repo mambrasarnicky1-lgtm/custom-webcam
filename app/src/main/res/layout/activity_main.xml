@@ -24,6 +24,45 @@
         android:textStyle="bold"/>
 
     <LinearLayout
+        android:id="@+id/ipConfigContainer"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/statusText"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="16dp"
+        android:layout_marginLeft="24dp"
+        android:layout_marginRight="24dp"
+        android:orientation="horizontal"
+        android:padding="8dp"
+        android:background="#A6000000"
+        android:gravity="center_vertical">
+
+        <EditText
+            android:id="@+id/editIpAddress"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:hint="IP PC (e.g. 192.168.1.50)"
+            android:textColorHint="#888888"
+            android:textColor="#FFFFFF"
+            android:text="127.0.0.1"
+            android:textSize="14sp"
+            android:background="@android:color/transparent"
+            android:maxLines="1"
+            android:inputType="text"/>
+
+        <Button
+            android:id="@+id/btnConnect"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Konek"
+            android:textSize="12sp"
+            android:backgroundTint="#4CAF50"
+            android:textColor="#FFFFFF"
+            android:layout_marginStart="8dp"/>
+    </LinearLayout>
+
+    <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_alignParentBottom="true"
